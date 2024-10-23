@@ -24,3 +24,19 @@ pub fn not_found(req: &Request) -> Json<ErrorResponse> {
         message: "Page not found".to_string(),
     })
 }
+
+#[catch(500)]
+pub fn internal_server_error(req: &Request) -> Json<ErrorResponse> {
+    Json(ErrorResponse {
+        status: 500,
+        message: "Internal Server Error".to_string(),
+    })
+}
+
+#[catch(204)]
+pub fn no_content(req: &Request) -> Json<ErrorResponse> {
+    Json(ErrorResponse {
+        status: 204,
+        message: "No Content".to_string(),
+    })
+}
