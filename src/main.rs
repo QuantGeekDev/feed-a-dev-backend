@@ -29,6 +29,6 @@ fn rocket() -> _ {
     dotenv().ok();
 
     rocket::build().mount("/", routes![index, create_snack, list_snacks, update_snack, delete_snack]).register("/", catchers![catchers::unauthorized, catchers::not_found,
-    catchers::no_content, catchers::internal_server_error])
+     catchers::internal_server_error])
 }
 
