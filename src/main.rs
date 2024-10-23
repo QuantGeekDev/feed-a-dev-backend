@@ -8,9 +8,9 @@ mod catchers;
 mod db;
 mod schema;
 
+use crate::routes::snack::{create_snack, list_snacks, update_snack};
 use dotenv::dotenv;
 use rocket::*;
-use routes::snack::create_snack;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -28,6 +28,6 @@ fn index() -> &'static str {
 fn rocket() -> _ {
     dotenv().ok();
 
-    rocket::build().mount("/", routes![index, create_snack]).register("/", catchers![catchers::unauthorized])
+    rocket::build().mount("/", routes![index, create_snack, list_snacks, update_snack]).register("/", catchers![catchers::unauthorized, catchers::not_found])
 }
 
