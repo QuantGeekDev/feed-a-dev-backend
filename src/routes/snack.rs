@@ -17,7 +17,7 @@ pub struct UpdateSnack {
 }
 
 #[post("/snack", data = "<snack_data>")]
-pub fn create_snack(_api_key: ApiKey, snack_data: Json<NewSnack>) -> Result<Json<Snack>, Status> {
+pub fn create_snack(snack_data: Json<NewSnack>) -> Result<Json<Snack>, Status> {
     let snack = snack_data.into_inner();
 
     let mut conn = db::establish_connection();
@@ -33,7 +33,7 @@ pub fn create_snack(_api_key: ApiKey, snack_data: Json<NewSnack>) -> Result<Json
 }
 
 #[get("/snacks")]
-pub fn list_snacks(_api_key: ApiKey) -> Result<Json<Vec<Snack>>, Status> {
+pub fn list_snacks() -> Result<Json<Vec<Snack>>, Status> {
     let mut conn = db::establish_connection();
 
     snacks
@@ -49,7 +49,6 @@ pub fn list_snacks(_api_key: ApiKey) -> Result<Json<Vec<Snack>>, Status> {
 
 #[patch("/snack/<snack_id>", data = "<snack_data>")]
 pub fn update_snack(
-    _api_key: ApiKey,
     snack_id: i32,
     snack_data: Json<UpdateSnack>,
 ) -> Result<Json<Snack>, Status> {
@@ -68,7 +67,7 @@ pub fn update_snack(
         })
 }
 #[delete("/snack/<snack_id>")]
-pub fn delete_snack(_api_key: ApiKey, snack_id: i32) -> Status {
+pub fn delete_snack(snack_id: i32) -> Status {
     let mut conn = db::establish_connection();
 
     match diesel::delete(snacks.find(snack_id)).execute(&mut conn) {
