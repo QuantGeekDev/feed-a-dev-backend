@@ -67,4 +67,21 @@ pub fn update_snack(
             }
         })
 }
+#[delete("/snack/<snack_id>")]
+pub fn delete_snack(_api_key: ApiKey, snack_id: i32) -> Status {
+    let mut conn = db::establish_connection();
 
+    match diesel::delete(snacks.find(snack_id)).execute(&mut conn) {
+        Ok(count) => {
+            if count > 0 {
+                Status::NoContent
+            } else {
+                Status::NotFound
+            }
+        }
+        Err(err) => {
+            println!("Database error: {:?}", err);
+            Status::InternalServerError
+        }
+    }
+}

@@ -8,7 +8,7 @@ mod catchers;
 mod db;
 mod schema;
 
-use crate::routes::snack::{create_snack, list_snacks, update_snack};
+use crate::routes::snack::{create_snack, delete_snack, list_snacks, update_snack};
 use dotenv::dotenv;
 use rocket::*;
 
@@ -28,6 +28,7 @@ fn index() -> &'static str {
 fn rocket() -> _ {
     dotenv().ok();
 
-    rocket::build().mount("/", routes![index, create_snack, list_snacks, update_snack]).register("/", catchers![catchers::unauthorized, catchers::not_found])
+    rocket::build().mount("/", routes![index, create_snack, list_snacks, update_snack, delete_snack]).register("/", catchers![catchers::unauthorized, catchers::not_found,
+    catchers::no_content, catchers::internal_server_error])
 }
 
