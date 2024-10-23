@@ -17,3 +17,6 @@ Cargo.lock
 
 #For Pau
 DS_Store
+!diesel_cli/Cargo.lock
+.env
+*.snap.new
