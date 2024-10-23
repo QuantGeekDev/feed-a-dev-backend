@@ -1,4 +1,16 @@
-#[macro_use] extern crate rocket;
+extern crate dotenv;
+#[macro_use]
+extern crate rocket;
+mod routes;
+mod models;
+mod auth;
+mod catchers;
+mod db;
+mod schema;
+
+use dotenv::dotenv;
+use rocket::*;
+use routes::snack::create_snack;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -12,9 +24,10 @@ fn index() -> &'static str {
 }
 
 
-
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index, world])
+    dotenv().ok();
+
+    rocket::build().mount("/", routes![index, create_snack]).register("/", catchers![catchers::unauthorized])
 }
 

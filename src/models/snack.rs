@@ -1,43 +1,29 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Selectable, Serialize)]
+#[derive(Queryable, Selectable, Serialize, AsChangeset)]
 #[diesel(table_name = crate::schema::snacks)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Snack {
     pub id: i32,
     pub name: String,
     pub category: String,
-    pub price: rust_decimal::Decimal,
+    #[diesel(sql_type = Numeric)]
+    pub price: Decimal,
     pub image_url: String,
     pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
 }
 
-#[derive(Deserialize)]
-pub struct NewSnackData {
-    pub name: String,
-    pub category: String,
-    pub price: f64,
-    pub image_url: String,
-}
-
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize)]
 #[diesel(table_name = crate::schema::snacks)]
 pub struct NewSnack {
     pub name: String,
     pub category: String,
-    pub price: rust_decimal::Decimal,
+    #[diesel(sql_type = Numeric)]
+    pub price: Decimal,
     pub image_url: String,
 }
 
-impl From<NewSnackData> for NewSnack {
-    fn from(data: NewSnackData) -> Self {
-        NewSnack {
-            name: data.name,
-            category: data.category,
-            price: rust_decimal::Decimal::from_f64(data.price).unwrap(),
-            image_url: data.image_url,
-        }
-    }
-}
