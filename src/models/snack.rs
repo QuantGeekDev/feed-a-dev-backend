@@ -3,8 +3,9 @@ use diesel::prelude::*;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Selectable, Serialize, AsChangeset)]
+#[derive(Queryable, Selectable, Serialize, AsChangeset, Associations)]
 #[diesel(table_name = crate::schema::snacks)]
+#[diesel(belongs_to(User))]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Snack {
     pub id: i32,
