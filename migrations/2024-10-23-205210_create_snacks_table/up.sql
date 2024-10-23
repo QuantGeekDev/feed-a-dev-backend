@@ -9,13 +9,10 @@ CREATE TABLE snacks
     updated_at TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Add trigger for managing updated_at
 SELECT diesel_manage_updated_at('snacks');
 
--- Add some indices for common queries
 CREATE INDEX idx_snacks_category ON snacks (category);
 CREATE INDEX idx_snacks_name ON snacks (name);
-
--- Add constraint for positive prices
+ 
 ALTER TABLE snacks
     ADD CONSTRAINT positive_price CHECK (price > 0);
