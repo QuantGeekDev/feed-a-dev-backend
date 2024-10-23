@@ -16,3 +16,11 @@ pub fn unauthorized(req: &Request) -> Json<ErrorResponse> {
         message: format!("Unauthorized access to {}", req.uri()),
     })
 }
+
+#[catch(404)]
+pub fn not_found(req: &Request) -> Json<ErrorResponse> {
+    Json(ErrorResponse {
+        status: 404,
+        message: "Page not found".to_string(),
+    })
+}
