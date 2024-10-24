@@ -1,15 +1,17 @@
 extern crate dotenv;
 #[macro_use]
 extern crate rocket;
-mod routes;
-mod models;
 mod auth;
 mod catchers;
 mod db;
+mod models;
+mod routes;
 mod schema;
 
 use crate::routes::auth::{login, register};
-use crate::routes::relationship::{invite_project_manager, list_developers, list_snacks, respond_to_invite};
+use crate::routes::relationship::{
+    invite_project_manager, list_developers, list_snacks, respond_to_invite,
+};
 use crate::routes::snack::{create_snack, delete_snack, update_snack};
 use dotenv::dotenv;
 use rocket::*;
@@ -25,12 +27,28 @@ fn index() -> &'static str {
     |___|    |_______||_______||______|        |__| |__|       |______| |_______|  |___|  "
 }
 
-
 #[launch]
 fn rocket() -> _ {
     dotenv().ok();
 
-    rocket::build().mount("/", routes![index, invite_project_manager,list_developers, respond_to_invite, create_snack, list_snacks, update_snack, delete_snack, register, login]).register("/", catchers![catchers::unauthorized, catchers::not_found,
-     catchers::internal_server_error])
+    rocket::build()
+        .mount(
+            "/",
+            routes![
+                index,
+                invite_project_manager,
+                list_developers,
+                respond_to_invite,
+                create_snack,
+                list_snacks,
+                update_snack,
+                delete_snack,
+                register,
+                login
+            ],
+        )
+        .register(
+            "/",
+            catchers![catchers::unauthorized, catchers::not_found, catchers::internal_server_error],
+        )
 }
-

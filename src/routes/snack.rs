@@ -18,19 +18,17 @@ pub struct UpdateSnack {
 }
 
 #[post("/snack", data = "<snack_data>")]
-pub fn create_snack(snack_data: Json<CreateSnackRequest>, user: AuthenticatedUser) -> Result<Json<Snack>, Status> {
+pub fn create_snack(
+    snack_data: Json<CreateSnackRequest>,
+    user: AuthenticatedUser,
+) -> Result<Json<Snack>, Status> {
     let mut conn = db::establish_connection();
     let snack = snack_data.into_inner().into_new_snack(user.0.id);
 
-
-    diesel::insert_into(snacks)
-        .values(&snack)
-        .get_result(&mut conn)
-        .map(Json)
-        .map_err(|err| {
-            println!("Database error: {:?}", err);
-            Status::InternalServerError
-        })
+    diesel::insert_into(snacks).values(&snack).get_result(&mut conn).map(Json).map_err(|err| {
+        println!("Database error: {:?}", err);
+        Status::InternalServerError
+    })
 }
 
 #[patch("/snack/<snack_id>", data = "<snack_data>")]
@@ -41,16 +39,13 @@ pub fn update_snack(
 ) -> Result<Json<Snack>, Status> {
     let mut conn = db::establish_connection();
 
-    let snack = snacks
-        .find(snack_id)
-        .first::<Snack>(&mut conn)
-        .map_err(|err| {
-            println!("Database error: {:?}", err);
-            match err {
-                diesel::result::Error::NotFound => Status::NotFound,
-                _ => Status::InternalServerError
-            }
-        })?;
+    let snack = snacks.find(snack_id).first::<Snack>(&mut conn).map_err(|err| {
+        println!("Database error: {:?}", err);
+        match err {
+            diesel::result::Error::NotFound => Status::NotFound,
+            _ => Status::InternalServerError,
+        }
+    })?;
 
     if snack.user_id != user.0.id && user.0.role != "admin" {
         return Err(Status::Forbidden);
@@ -64,7 +59,7 @@ pub fn update_snack(
             println!("Database error: {:?}", err);
             match err {
                 diesel::result::Error::NotFound => Status::NotFound,
-                _ => Status::InternalServerError
+                _ => Status::InternalServerError,
             }
         })
 }
@@ -73,9 +68,7 @@ pub fn update_snack(
 pub fn delete_snack(snack_id: i32, user: AuthenticatedUser) -> Status {
     let mut conn = db::establish_connection();
 
-    match snacks
-        .find(snack_id)
-        .first::<Snack>(&mut conn) {
+    match snacks.find(snack_id).first::<Snack>(&mut conn) {
         Ok(snack) => {
             if snack.user_id != user.0.id && user.0.role != "admin" {
                 return Status::Forbidden;
@@ -93,7 +86,7 @@ pub fn delete_snack(snack_id: i32, user: AuthenticatedUser) -> Status {
             println!("Database error: {:?}", err);
             match err {
                 diesel::result::Error::NotFound => Status::NotFound,
-                _ => Status::InternalServerError
+                _ => Status::InternalServerError,
             }
         }
     }

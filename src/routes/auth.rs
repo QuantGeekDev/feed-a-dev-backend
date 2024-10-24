@@ -30,14 +30,15 @@ pub struct TokenResponse {
 #[post("/register", data = "<info>")]
 pub fn register(info: Json<RegisterInfo>) -> Result<Json<User>, Status> {
     let conn = &mut db::establish_connection();
-    let hashed_password = hash(&info.password, DEFAULT_COST)
-        .map_err(|_| Status::InternalServerError)?;
+    let hashed_password =
+        hash(&info.password, DEFAULT_COST).map_err(|_| Status::InternalServerError)?;
 
     let user_role = match info.role.as_deref() {
         Some("developer") => "developer",
         Some("project_manager") => "project_manager",
-        _ => "developer"
-    }.to_string();
+        _ => "developer",
+    }
+    .to_string();
 
     let new_user = NewUser {
         username: info.username.clone(),
@@ -60,17 +61,10 @@ pub fn login(info: Json<LoginInfo>) -> Result<Json<TokenResponse>, Status> {
         .first::<User>(conn)
         .map_err(|_| Status::Unauthorized)?;
     if verify(&info.password, &user.password_hash).map_err(|_| Status::InternalServerError)? {
-        let claims = Claims {
-            sub: user.id,
-            role: user.role.clone(),
-            exp: 10000000000,
-        };
-        let token = encode(
-            &Header::default(),
-            &claims,
-            &EncodingKey::from_secret("SECRET".as_ref()),
-        )
-            .map_err(|_| Status::InternalServerError)?;
+        let claims = Claims { sub: user.id, role: user.role.clone(), exp: 10000000000 };
+        let token =
+            encode(&Header::default(), &claims, &EncodingKey::from_secret("SECRET".as_ref()))
+                .map_err(|_| Status::InternalServerError)?;
         Ok(Json(TokenResponse { token }))
     } else {
         Err(Status::Unauthorized)
