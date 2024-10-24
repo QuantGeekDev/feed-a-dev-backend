@@ -1,5 +1,6 @@
+use crate::auth::user::AuthenticatedUser;
 use crate::db;
-use crate::models::snack::{NewSnack, Snack};
+use crate::models::snack::{CreateSnackRequest, Snack};
 use crate::schema::snacks::dsl::snacks;
 use diesel::prelude::*;
 use rocket::http::Status;
@@ -16,10 +17,10 @@ pub struct UpdateSnack {
 }
 
 #[post("/snack", data = "<snack_data>")]
-pub fn create_snack(snack_data: Json<NewSnack>) -> Result<Json<Snack>, Status> {
-    let snack = snack_data.into_inner();
-
+pub fn create_snack(snack_data: Json<CreateSnackRequest>, user: AuthenticatedUser) -> Result<Json<Snack>, Status> {
     let mut conn = db::establish_connection();
+    let snack = snack_data.into_inner().into_new_snack(user.0.id);
+
 
     diesel::insert_into(snacks)
         .values(&snack)

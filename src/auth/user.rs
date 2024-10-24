@@ -25,7 +25,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         match token {
             Some(token) if token.starts_with("Bearer ") => {
                 let token = &token[7..];
-                let decoding_key = DecodingKey::from_secret("your_secret_key".as_ref());
+                let decoding_key = DecodingKey::from_secret("SECRET".as_ref());
                 match decode::<Claims>(token, &decoding_key, &Validation::new(Algorithm::HS256)) {
                     Ok(token_data) => {
                         let mut conn = crate::db::establish_connection();
