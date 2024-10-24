@@ -1,7 +1,8 @@
-use crate::auth::ApiKey;
+use crate::auth::user::AuthenticatedUser;
 use crate::db;
-use crate::models::snack::{NewSnack, Snack};
-use crate::schema::snacks::dsl::{id, snacks};
+use crate::models::snack::{CreateSnackRequest, Snack};
+use crate::schema::snacks::dsl::snacks;
+use crate::schema::snacks::user_id;
 use diesel::prelude::*;
 use rocket::http::Status;
 use rocket::serde::json::Json;
@@ -17,10 +18,10 @@ pub struct UpdateSnack {
 }
 
 #[post("/snack", data = "<snack_data>")]
-pub fn create_snack(_api_key: ApiKey, snack_data: Json<NewSnack>) -> Result<Json<Snack>, Status> {
-    let snack = snack_data.into_inner();
-
+pub fn create_snack(snack_data: Json<CreateSnackRequest>, user: AuthenticatedUser) -> Result<Json<Snack>, Status> {
     let mut conn = db::establish_connection();
+    let snack = snack_data.into_inner().into_new_snack(user.0.id);
+
 
     diesel::insert_into(snacks)
         .values(&snack)
@@ -33,27 +34,51 @@ pub fn create_snack(_api_key: ApiKey, snack_data: Json<NewSnack>) -> Result<Json
 }
 
 #[get("/snacks")]
-pub fn list_snacks(_api_key: ApiKey) -> Result<Json<Vec<Snack>>, Status> {
+pub fn list_snacks(user: AuthenticatedUser) -> Result<Json<Vec<Snack>>, Status> {
     let mut conn = db::establish_connection();
 
-    snacks
-        .limit(10)
-        .select(Snack::as_select())
-        .load(&mut conn)
+    let results = if user.0.role == "admin" {
+        snacks
+            .limit(100)
+            .select(Snack::as_select())
+            .load(&mut conn)
+    } else {
+        snacks
+            .filter(user_id.eq(user.0.id))
+            .limit(100)
+            .select(Snack::as_select())
+            .load(&mut conn)
+    };
+
+    results
         .map(Json)
         .map_err(|err| {
             println!("Database error: {:?}", err);
             Status::InternalServerError
         })
 }
-
 #[patch("/snack/<snack_id>", data = "<snack_data>")]
 pub fn update_snack(
-    _api_key: ApiKey,
     snack_id: i32,
     snack_data: Json<UpdateSnack>,
+    user: AuthenticatedUser,
 ) -> Result<Json<Snack>, Status> {
     let mut conn = db::establish_connection();
+
+    let snack = snacks
+        .find(snack_id)
+        .first::<Snack>(&mut conn)
+        .map_err(|err| {
+            println!("Database error: {:?}", err);
+            match err {
+                diesel::result::Error::NotFound => Status::NotFound,
+                _ => Status::InternalServerError
+            }
+        })?;
+
+    if snack.user_id != user.0.id && user.0.role != "admin" {
+        return Err(Status::Forbidden);
+    }
 
     diesel::update(snacks.find(snack_id))
         .set(&snack_data.into_inner())
@@ -67,21 +92,33 @@ pub fn update_snack(
             }
         })
 }
+
 #[delete("/snack/<snack_id>")]
-pub fn delete_snack(_api_key: ApiKey, snack_id: i32) -> Status {
+pub fn delete_snack(snack_id: i32, user: AuthenticatedUser) -> Status {
     let mut conn = db::establish_connection();
 
-    match diesel::delete(snacks.find(snack_id)).execute(&mut conn) {
-        Ok(count) => {
-            if count > 0 {
-                Status::NoContent
-            } else {
-                Status::NotFound
+    match snacks
+        .find(snack_id)
+        .first::<Snack>(&mut conn) {
+        Ok(snack) => {
+            if snack.user_id != user.0.id && user.0.role != "admin" {
+                return Status::Forbidden;
+            }
+
+            match diesel::delete(snacks.find(snack_id)).execute(&mut conn) {
+                Ok(_) => Status::NoContent,
+                Err(err) => {
+                    println!("Database error: {:?}", err);
+                    Status::InternalServerError
+                }
             }
         }
         Err(err) => {
             println!("Database error: {:?}", err);
-            Status::InternalServerError
+            match err {
+                diesel::result::Error::NotFound => Status::NotFound,
+                _ => Status::InternalServerError
+            }
         }
     }
 }
