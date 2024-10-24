@@ -8,10 +8,12 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use rocket::http::Status;
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
+
 #[derive(Deserialize)]
 pub struct RegisterInfo {
     username: String,
     password: String,
+    role: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -19,6 +21,7 @@ pub struct LoginInfo {
     username: String,
     password: String,
 }
+
 #[derive(Serialize)]
 pub struct TokenResponse {
     token: String,
@@ -30,10 +33,16 @@ pub fn register(info: Json<RegisterInfo>) -> Result<Json<User>, Status> {
     let hashed_password = hash(&info.password, DEFAULT_COST)
         .map_err(|_| Status::InternalServerError)?;
 
+    let user_role = match info.role.as_deref() {
+        Some("developer") => "developer",
+        Some("project_manager") => "project_manager",
+        _ => "developer"
+    }.to_string();
+
     let new_user = NewUser {
         username: info.username.clone(),
         password_hash: hashed_password,
-        role: "user".to_string(),
+        role: user_role,
     };
 
     diesel::insert_into(users)

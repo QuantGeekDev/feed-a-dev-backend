@@ -33,30 +33,6 @@ pub fn create_snack(snack_data: Json<CreateSnackRequest>, user: AuthenticatedUse
         })
 }
 
-#[get("/snacks")]
-pub fn list_snacks(user: AuthenticatedUser) -> Result<Json<Vec<Snack>>, Status> {
-    let mut conn = db::establish_connection();
-
-    let results = if user.0.role == "admin" {
-        snacks
-            .limit(100)
-            .select(Snack::as_select())
-            .load(&mut conn)
-    } else {
-        snacks
-            .filter(user_id.eq(user.0.id))
-            .limit(100)
-            .select(Snack::as_select())
-            .load(&mut conn)
-    };
-
-    results
-        .map(Json)
-        .map_err(|err| {
-            println!("Database error: {:?}", err);
-            Status::InternalServerError
-        })
-}
 #[patch("/snack/<snack_id>", data = "<snack_data>")]
 pub fn update_snack(
     snack_id: i32,
