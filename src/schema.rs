@@ -37,8 +37,4 @@ diesel::table! {
 
 diesel::joinable!(snacks -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    dev_pm_relationships,
-    snacks,
-    users,
-);
+diesel::allow_tables_to_appear_in_same_query!(dev_pm_relationships, snacks, users,);
