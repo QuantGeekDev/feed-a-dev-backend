@@ -21,10 +21,11 @@ clean:
 	cargo clean
 
 db:
-	docker-compose up -d
+	docker compose up -d
+	@sleep 3
 
 db-stop:
-	docker-compose down
+	docker compose down
 
 db-setup:
 	diesel setup
