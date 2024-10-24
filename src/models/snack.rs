@@ -1,3 +1,4 @@
+use crate::models::user::User;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use rust_decimal::Decimal;
@@ -16,6 +17,8 @@ pub struct Snack {
     pub image_url: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+    pub user_id: i32,
+
 }
 
 #[derive(Insertable, Deserialize)]

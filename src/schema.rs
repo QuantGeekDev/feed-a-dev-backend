@@ -9,6 +9,7 @@ diesel::table! {
         image_url -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        user_id -> Int4,
     }
 }
 
@@ -22,6 +23,8 @@ diesel::table! {
         updated_at -> Timestamp,
     }
 }
+
+diesel::joinable!(snacks -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     snacks,

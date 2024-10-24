@@ -1,7 +1,6 @@
-use crate::auth::ApiKey;
 use crate::db;
 use crate::models::snack::{NewSnack, Snack};
-use crate::schema::snacks::dsl::{id, snacks};
+use crate::schema::snacks::dsl::snacks;
 use diesel::prelude::*;
 use rocket::http::Status;
 use rocket::serde::json::Json;

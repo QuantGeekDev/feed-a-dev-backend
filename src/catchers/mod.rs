@@ -18,7 +18,7 @@ pub fn unauthorized(req: &Request) -> Json<ErrorResponse> {
 }
 
 #[catch(404)]
-pub fn not_found(req: &Request) -> Json<ErrorResponse> {
+pub fn not_found(_req: &Request) -> Json<ErrorResponse> {
     Json(ErrorResponse {
         status: 404,
         message: "Page not found".to_string(),
@@ -26,7 +26,7 @@ pub fn not_found(req: &Request) -> Json<ErrorResponse> {
 }
 
 #[catch(500)]
-pub fn internal_server_error(req: &Request) -> Json<ErrorResponse> {
+pub fn internal_server_error(_req: &Request) -> Json<ErrorResponse> {
     Json(ErrorResponse {
         status: 500,
         message: "Internal Server Error".to_string(),
