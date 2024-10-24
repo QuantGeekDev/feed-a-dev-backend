@@ -9,7 +9,8 @@ mod db;
 mod schema;
 
 use crate::routes::auth::{login, register};
-use crate::routes::snack::{create_snack, delete_snack, list_snacks, update_snack};
+use crate::routes::relationship::{invite_project_manager, list_developers, list_snacks, respond_to_invite};
+use crate::routes::snack::{create_snack, delete_snack, update_snack};
 use dotenv::dotenv;
 use rocket::*;
 
@@ -29,7 +30,7 @@ fn index() -> &'static str {
 fn rocket() -> _ {
     dotenv().ok();
 
-    rocket::build().mount("/", routes![index, create_snack, list_snacks, update_snack, delete_snack, register, login]).register("/", catchers![catchers::unauthorized, catchers::not_found,
+    rocket::build().mount("/", routes![index, invite_project_manager,list_developers, respond_to_invite, create_snack, list_snacks, update_snack, delete_snack, register, login]).register("/", catchers![catchers::unauthorized, catchers::not_found,
      catchers::internal_server_error])
 }
 
