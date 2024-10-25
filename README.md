@@ -6,6 +6,7 @@ Automates getting coffee and snacks for tired devs
 
 # API Endpoints
 
+### [Link to postman collection](https://elements.getpostman.com/redirect?entityId=17880741-ce517d06-08c1-43e3-be29-99c28e898c42&entityType=collection)
 ## Auth Routes
 | Method | Endpoint | Description | Auth Required | Request Body |
 |--------|----------|-------------|---------------|--------------|
